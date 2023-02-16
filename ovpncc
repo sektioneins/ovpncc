@@ -1,0 +1,50 @@
+#!/bin/sh
+##
+## OpenVPN Security Config Checker
+##
+## Copyright 2023 SektionEins GmbH
+## 
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+## 
+## http://www.apache.org/licenses/LICENSE-2.0
+## 
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+##
+## useful links:
+## - download -> https://github.com/sektioneins/ovpncc
+## - Article - Hardening OpenVPN Security -> https://openvpn.net/community-resources/hardening-openvpn-security/
+##
+
+# the following lines are Tcl comments \
+for i in tclsh8.6 tclsh; do \
+	if type $i >/dev/null; then exec $i "$0" "$@"; fi; \
+done; echo "Tcl not found. Please install Tcl 8.6 or newer"; exit 1
+
+set tool_name ovpncc
+set tool_version "0.1rc1"
+set tool_url "https://github.com/sektioneins/$tool_name"
+set tool_copyright "(c) 2023 SektionEins GmbH / Ben Fuhrmannek - https://sektioneins.de/"
+set tool_banner "OpenVPN Security Config Checker v$tool_version"
+append tool_banner "\n  $tool_copyright\n  $tool_url"
+
+proc load_scframework {} {
+	foreach dir [list [file dirname [info script]] /usr/local/lib/$::tool_name /usr/lib/$::tool_name /usr/share/$::tool_name] {
+		set fn [file join $dir {scframework/scframework.tcl}]
+		if {[file exists $fn]} {
+			source $fn
+			namespace import scframework::*
+			set ::tool_libdir $dir
+			return
+		}
+	}
+	puts stderr "Cannot find scframework."
+	exit 1
+}
+load_scframework
+init_scframework {ovpncc.tcl}
